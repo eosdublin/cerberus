@@ -7,6 +7,8 @@ The scripts here enable the user to deploy two LXC containers to a single machin
 
 The following diagram shows the result of running the scripts (apologies for the child like scrawling, this will be replaced with an easier to read version):
 
+*Note:* The ports in red are what's defined in the default repo. Ignore the ones in blue. The ones in green are what's in use here.
+
 ![Layout Diagram](https://github.com/eosdublin/cerberus/raw/master/diagram.png "Sketch")
 
 ## TODO
