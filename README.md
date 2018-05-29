@@ -3,16 +3,16 @@ A collection of scripts and binaries used to automate the setup of servers that 
 
 The scripts here are based on the official EOS.IO Patroneos repository whereby Docker has been replaced with LXC. https://github.com/EOSIO/patroneos
 
-The scripts here enable the user to deploy two LXC containers to a single machine, establishing the advanced setup scenario from the Patroneos repository. 
+The scripts here enable the user to deploy two LXC containers to a single machine, establishing the advanced setup scenario from the Patroneos repository. One running proxy mode (:443 for HAProxy and :9998 for Patroneos in log mode) and another running filter mode (:9999 for Patroneos in filter mode).
 
-The following diagram shows the result of running the scripts:
+The following diagram shows the result of running the scripts (apologies for the child like scrawling, this will be replaced with an easier to read version):
 
-
+![Layout Diagram](https://github.com/eosdublin/cerberus/raw/master/diagram.png "Sketch")
 
 ## TODO
 
-- Allow the nodeos URL to be set dynamically. This will be sitting on a different box, so pass it as a param
-- The proxy node requires multiple iptable entries as it also hosts the log listener
+- Review IP tables rules and lock them down (@jemexpat is working on this in parallel)
+- Fix permissions issue with start patroneos (currently running as root)
 
 ## Usage
 
@@ -23,10 +23,14 @@ The repository contains a pre-combiled version of Patroneos, however it is advis
 
 Note: You need to have go installed. `$apt install golang` for you Ubuntu users.
 
+LXC should already be initialised prior to running setup.
+
 ### Running
 
 Invoke setup.sh to create and launch the LXC containers. To modify the ports that are used, simply edit setup.sh, line 17.
 
-./setup.sh node_os_protocol node_os_address node_os_port
+./setup.sh
 
 ### Configuration
+
+To point to your nodeos API, change the values in containers/filter/patroneos_filter_config.
