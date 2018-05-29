@@ -33,19 +33,21 @@ echo ">>> Running container setup script..."
 lxc exec $CONTAINER_NAME -- /bin/bash /tmp/$CONTAINER_NAME/container_setup.sh /tmp/$CONTAINER_NAME &>> /tmp/setup_log.txt
 
 echo ">>> Configuring iptables routing..."
-VMIP=$(hostname -I | awk '{print $1}')
-CONTAINERIP=$(lxc list | grep $CONTAINER_NAME | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+HOST_IP=$(hostname -I | awk '{print $1}')
+CONTAINER_IP=$(lxc list | grep $CONTAINER_NAME | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
 
 # Iterate the port mappings
 IFS=',' read -ra MAPPINGS <<< "$PORT_MAPPINGS"
 for mapping in "${MAPPINGS[@]}"; do
+ 
+    EXT_PORT=$(echo $mapping | cut -d ":" -f 1)
+    INT_PORT=$(echo $mapping | cut -d ":" -f 2)
+    INTERFACE=$(echo $mapping | cut -d ":" -f 3)
 
-    ext_port=cut $mapping -d ":" -f 1
-    int_port=cut $mapping -d ":" -f 2
-    nic=cut $mapping -d ":" -f 3
+    echo "Creating a mapping from $HOST_IP:$EXT_PORT -> $CONTAINER_IP:$INT_PORT on $NIC"
 
-    sudo iptables -t nat -I PREROUTING -i $nic -p TCP -d $VMIP --dport $ext_port -j DNAT --to-destination $CONTAINERIP:$int_port
+    sudo iptables -t nat -I PREROUTING -i $INTERFACE -p TCP -d $HOST_IP --dport $EXT_PORT -j DNAT --to-destination $CONTAINER_IP:$INT_PORT
 done
 
-printf ">>> Done ($VMIP -> $CONTAINERIP)\\n"
+printf ">>> Done ($HOST_IP -> $CONTAINER_IP)\\n"
 # </Body>
