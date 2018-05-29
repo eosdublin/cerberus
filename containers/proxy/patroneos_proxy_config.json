@@ -1,4 +1,4 @@
-{
-    "listenPort": "9999",
+{   
+    "listenPort": "9998",
     "logFileLocation": "/var/log/patroneosd.log"
 }

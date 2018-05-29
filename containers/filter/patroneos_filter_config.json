@@ -1,16 +1,16 @@
-{
-    "listenPort": "9998",
+{   
+    "listenPort": "9999",
 
-    "logEndpoints": ["http://localhost:9999"],
+    "logEndpoints": ["http://localhost:9998"],
 
     "nodeosProtocol": "http",
-    "nodeosUrl": "localhost",
-    "nodeosPort": "9990",
+    "nodeosUrl": "10.1.0.6",
+    "nodeosPort": "8444",
 
     "contractBlackList": {
         "currency": true
     },
-	
+
     "maxSignatures": 10,
     "maxTransactionSize": 500000
 }
