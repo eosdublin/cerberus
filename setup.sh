@@ -14,7 +14,15 @@ SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 # </Imports>
 
 # <Constants>
-declare -a containers=("proxy 8081 80 eth0" "filter 80 81 lxdbr0")
+# The format of each entry is:
+#
+#   container_name port_mapping+
+#
+# Where
+#
+#    port_mapping: lxc_external_port:lxc_internal_port:interface
+#
+declare -a containers=("proxy 443:443:eth0,9998:9998:eth0" "filter 9999:9999:eth0")
 # </Constants>
 
 # <Body>
@@ -27,7 +35,7 @@ do
 	echo ">>> Done setting up $container container."
 done
 
-echo ">>> Persisting IP tables"
+echo ">>> Persisting host IP table entries"
 
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
 echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections

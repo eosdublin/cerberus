@@ -15,19 +15,18 @@ SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 # <Parameters>
 CONTAINER_NAME=$1
-PUBLIC_PROXY_PORT=$2
-PROXY_CONTAINER_PORT=$3
-NIC=$4 || eth0
+PORT_MAPPINGS=$2
+BASE_IMAGE=${3:-"ubuntu:18.04"}
 # </Parameters>
 
 # <Body>
 echo ">>> Launching container..."
-lxc launch --verbose ubuntu:18.04 $CONTAINER_NAME
+lxc launch $BASE_IMAGE $CONTAINER_NAME
 
 echo ">>> Pausing to let container start..."
 wait_bar 0.5
 
-printf "\\n>>> Containers started. Pushing setup files to container...\\n"
+printf "\\n>>> Container started. Pushing setup files to container...\\n"
 lxc file push -rp --verbose $SCRIPT_PATH/containers/$CONTAINER_NAME $CONTAINER_NAME/tmp
 
 echo ">>> Running container setup script..."
@@ -37,7 +36,16 @@ echo ">>> Configuring iptables routing..."
 VMIP=$(hostname -I | awk '{print $1}')
 CONTAINERIP=$(lxc list | grep $CONTAINER_NAME | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
 
-sudo iptables -t nat -I PREROUTING -i $NIC -p TCP -d $VMIP --dport $PUBLIC_PROXY_PORT -j DNAT --to-destination $CONTAINERIP:$PROXY_CONTAINER_PORT
+# Iterate the port mappings
+IFS=',' read -ra MAPPINGS <<< "$PORT_MAPPINGS"
+for mapping in "${MAPPINGS[@]}"; do
+
+    ext_port=cut $mapping -d ":" -f 1
+    int_port=cut $mapping -d ":" -f 2
+    nic=cut $mapping -d ":" -f 3
+
+    sudo iptables -t nat -I PREROUTING -i $nic -p TCP -d $VMIP --dport $ext_port -j DNAT --to-destination $CONTAINERIP:$int_port
+done
 
 printf ">>> Done ($VMIP -> $CONTAINERIP)\\n"
 # </Body>
